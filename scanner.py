@@ -1,11 +1,12 @@
 """Enumerate installed macOS apps and their last-used dates."""
 
 import os
+import re
 import subprocess
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 
 @dataclass
@@ -36,7 +37,6 @@ def _get_bundle_id(path: str) -> Optional[str]:
     out = _run(["mdls", "-name", "kMDItemCFBundleIdentifier", "-raw", path])
     if out and out != "(null)":
         return out
-    # Spotlight sometimes doesn't index this; read Info.plist directly as fallback
     plist = os.path.join(path, "Contents", "Info.plist")
     if os.path.exists(plist):
         out = _run(["/usr/libexec/PlistBuddy", "-c", "Print :CFBundleIdentifier", plist])
@@ -56,12 +56,161 @@ def _latest_mtime(paths: list) -> Optional[datetime]:
     return max(dates) if dates else None
 
 
+# ---------------------------------------------------------------------------
+# Steam support
+# ---------------------------------------------------------------------------
+
+_STEAM_PLAYTIMES: Optional[Dict[str, int]] = None
+
+
+def _load_steam_playtimes() -> Dict[str, int]:
+    """Parse Steam localconfig.vdf for last-played timestamps across all games.
+
+    Uses the per-user config file rather than individual appmanifest files so
+    it works for games not currently installed on this machine.
+    """
+    playtimes: Dict[str, int] = {}
+    userdata = Path.home() / "Library" / "Application Support" / "Steam" / "userdata"
+    if not userdata.exists():
+        return playtimes
+
+    for vdf_path in userdata.glob("*/config/localconfig.vdf"):
+        try:
+            current_id: Optional[str] = None
+            in_apps = False
+            depth = 0
+            apps_depth: Optional[int] = None
+
+            with open(vdf_path, errors="replace") as f:
+                for line in f:
+                    line = line.strip()
+                    if line == '"apps"':
+                        in_apps = True
+                        apps_depth = depth
+                        continue
+                    if line == "{":
+                        depth += 1
+                        continue
+                    if line == "}":
+                        depth -= 1
+                        if in_apps and apps_depth is not None and depth <= apps_depth:
+                            in_apps = False
+                        continue
+                    if not in_apps:
+                        continue
+                    if apps_depth is not None and depth == apps_depth + 1:
+                        m = re.match(r'^"(\d+)"$', line)
+                        if m:
+                            current_id = m.group(1)
+                    if current_id and '"LastPlayed"' in line:
+                        m = re.search(r'"LastPlayed"\s+"(\d+)"', line)
+                        if m:
+                            ts = int(m.group(1))
+                            if ts > 0:
+                                playtimes[current_id] = max(playtimes.get(current_id, 0), ts)
+        except Exception:
+            pass
+
+    return playtimes
+
+
+def _steam_playtimes() -> Dict[str, int]:
+    global _STEAM_PLAYTIMES
+    if _STEAM_PLAYTIMES is None:
+        _STEAM_PLAYTIMES = _load_steam_playtimes()
+    return _STEAM_PLAYTIMES
+
+
+def _get_steam_app_id(app_path: str) -> Optional[str]:
+    """Extract Steam app ID from steam_appid.txt or a run.sh shortcut."""
+    # Standard Steam game build
+    txt = os.path.join(app_path, "Contents", "MacOS", "steam_appid.txt")
+    if os.path.exists(txt):
+        try:
+            return open(txt).read().strip()
+        except Exception:
+            pass
+    # Paradox / Steam shortcut style: run.sh contains "open steam://run/<ID>"
+    run_sh = os.path.join(app_path, "Contents", "MacOS", "run.sh")
+    if os.path.exists(run_sh):
+        try:
+            m = re.search(r"steam://run/(\d+)", open(run_sh).read())
+            if m:
+                return m.group(1)
+        except Exception:
+            pass
+    return None
+
+
+def _steam_last_played(app_path: str) -> Optional[datetime]:
+    app_id = _get_steam_app_id(app_path)
+    if not app_id:
+        return None
+
+    # localconfig.vdf has timestamps for all played games, installed or not
+    ts = _steam_playtimes().get(app_id, 0)
+    if ts > 0:
+        return datetime.fromtimestamp(ts)
+
+    # Fallback: appmanifest (only present when game is installed locally)
+    manifest = (
+        Path.home()
+        / "Library" / "Application Support" / "Steam" / "steamapps"
+        / f"appmanifest_{app_id}.acf"
+    )
+    if manifest.exists():
+        try:
+            for line in open(manifest):
+                if '"LastPlayed"' in line:
+                    parts = line.strip().split('"')
+                    if len(parts) >= 4:
+                        ts = int(parts[3])
+                        if ts > 0:
+                            return datetime.fromtimestamp(ts)
+        except Exception:
+            pass
+
+    return None
+
+
+# ---------------------------------------------------------------------------
+# Application Support fuzzy scan
+# ---------------------------------------------------------------------------
+
+def _fuzzy_support_dirs(app_name: str) -> List[Path]:
+    """Scan Application Support and Group Containers for dirs matching the app name.
+
+    Catches mismatches like Anki -> Anki2, Unity games using company.gamename
+    paths, and Microsoft apps stored under Group Containers.
+    """
+    lib = Path.home() / "Library"
+    needle = app_name.lower().replace(" ", "").replace("-", "")
+    matches: List[Path] = []
+
+    for root in [lib / "Application Support", lib / "Group Containers"]:
+        if not root.exists():
+            continue
+        try:
+            for entry in root.iterdir():
+                hay = entry.name.lower().replace(" ", "").replace("-", "").replace(".", "")
+                if needle in hay or (len(needle) >= 4 and hay.startswith(needle[:5])):
+                    matches.append(entry)
+        except PermissionError:
+            pass
+
+    return matches
+
+
+# ---------------------------------------------------------------------------
+# Last-used resolution
+# ---------------------------------------------------------------------------
+
 def _get_last_used(
     path: str,
     bundle_id: Optional[str] = None,
     app_name: Optional[str] = None,
 ) -> Optional[datetime]:
-    # Primary: Spotlight metadata on the .app bundle
+    # 1. Spotlight — fast, but unreliable for sandboxed / Electron apps
     out = _run(["mdls", "-name", "kMDItemLastUsedDate", "-raw", path])
     if out and out != "(null)":
         try:
@@ -69,13 +218,14 @@ def _get_last_used(
         except ValueError:
             pass
 
-    # Fallback: per-app data directories macOS updates on every launch.
-    # Sandboxed (App Store) apps don't reliably update kMDItemLastUsedDate,
-    # but their Containers / SavedState / Preferences entries always get touched.
-    # Electron apps (e.g. Claude, Slack) often use the app name rather than
-    # the bundle ID as their Application Support folder name.
+    # 2. Steam — reads localconfig.vdf (covers uninstalled games too)
+    steam_date = _steam_last_played(path)
+    if steam_date:
+        return steam_date
+
+    # 3. Per-app data directories macOS touches on every launch
     lib = Path.home() / "Library"
-    candidates = []
+    candidates: List[Path] = []
 
     if bundle_id:
         candidates += [
@@ -86,12 +236,14 @@ def _get_last_used(
         ]
 
     if app_name:
-        candidates += [
-            lib / "Application Support" / app_name,
-        ]
+        candidates += _fuzzy_support_dirs(app_name)
 
     return _latest_mtime(candidates) if candidates else None
 
+
+# ---------------------------------------------------------------------------
+# Scanning
+# ---------------------------------------------------------------------------
 
 def scan_applications() -> List[AppInfo]:
     apps = []
