@@ -1,0 +1,712 @@
+{
+  "spotify": {
+    "display_name": "Spotify",
+    "category": "Music Streaming",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Navidrome",
+        "description": "Self-hosted music streaming server, Subsonic-compatible",
+        "license": "GPL-3.0",
+        "type": "self-hosted",
+        "url": "https://navidrome.org",
+        "github": "navidrome/navidrome",
+        "platforms": ["mac", "windows", "linux", "ios", "android", "web"],
+        "free": true
+      },
+      {
+        "name": "Strawberry",
+        "description": "Local music player with last.fm scrobbling",
+        "license": "GPL-3.0",
+        "type": "desktop",
+        "url": "https://strawberrymusicplayer.org",
+        "github": "strawberrymusicplayer/strawberry",
+        "platforms": ["mac", "windows", "linux"],
+        "free": true
+      },
+      {
+        "name": "Plexamp",
+        "description": "Music player for Plex (free tier with own library)",
+        "license": "proprietary",
+        "type": "freemium",
+        "url": "https://plexamp.com",
+        "platforms": ["mac", "windows", "linux", "ios", "android"],
+        "free": false
+      }
+    ]
+  },
+  "chrome": {
+    "display_name": "Google Chrome",
+    "category": "Browser",
+    "big_tech": true,
+    "alternatives": [
+      {
+        "name": "Firefox",
+        "description": "Privacy-respecting browser by Mozilla",
+        "license": "MPL-2.0",
+        "type": "desktop",
+        "url": "https://firefox.com",
+        "github": "mozilla/gecko-dev",
+        "platforms": ["mac", "windows", "linux", "ios", "android"],
+        "free": true
+      },
+      {
+        "name": "Librewolf",
+        "description": "Firefox fork with hardened privacy defaults",
+        "license": "MPL-2.0",
+        "type": "desktop",
+        "url": "https://librewolf.net",
+        "github": "librewolf-community/browser-desktop",
+        "platforms": ["mac", "windows", "linux"],
+        "free": true
+      },
+      {
+        "name": "Brave",
+        "description": "Chromium-based browser with built-in ad blocking",
+        "license": "MPL-2.0",
+        "type": "desktop",
+        "url": "https://brave.com",
+        "github": "brave/brave-browser",
+        "platforms": ["mac", "windows", "linux", "ios", "android"],
+        "free": true
+      }
+    ]
+  },
+  "slack": {
+    "display_name": "Slack",
+    "category": "Team Communication",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Element",
+        "description": "End-to-end encrypted Matrix client",
+        "license": "Apache-2.0",
+        "type": "desktop+web+self-hosted",
+        "url": "https://element.io",
+        "github": "element-hq/element-web",
+        "platforms": ["mac", "windows", "linux", "ios", "android", "web"],
+        "free": true
+      },
+      {
+        "name": "Mattermost",
+        "description": "Self-hostable Slack alternative for teams",
+        "license": "MIT/EE",
+        "type": "self-hosted",
+        "url": "https://mattermost.com",
+        "github": "mattermost/mattermost",
+        "platforms": ["mac", "windows", "linux", "ios", "android", "web"],
+        "free": true
+      },
+      {
+        "name": "Zulip",
+        "description": "Topic-threaded team chat, self-hostable",
+        "license": "Apache-2.0",
+        "type": "self-hosted+cloud",
+        "url": "https://zulip.com",
+        "github": "zulip/zulip",
+        "platforms": ["mac", "windows", "linux", "ios", "android", "web"],
+        "free": true
+      }
+    ]
+  },
+  "zoom": {
+    "display_name": "Zoom",
+    "category": "Video Conferencing",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Jitsi Meet",
+        "description": "No-account browser-based video calls",
+        "license": "Apache-2.0",
+        "type": "web+self-hosted",
+        "url": "https://meet.jit.si",
+        "github": "jitsi/jitsi-meet",
+        "platforms": ["mac", "windows", "linux", "ios", "android", "web"],
+        "free": true
+      },
+      {
+        "name": "BigBlueButton",
+        "description": "Open-source video conferencing for education",
+        "license": "LGPL-3.0",
+        "type": "self-hosted",
+        "url": "https://bigbluebutton.org",
+        "github": "bigbluebutton/bigbluebutton",
+        "platforms": ["web"],
+        "free": true
+      }
+    ]
+  },
+  "dropbox": {
+    "display_name": "Dropbox",
+    "category": "File Sync",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Syncthing",
+        "description": "Decentralised P2P file sync, no server needed",
+        "license": "MPL-2.0",
+        "type": "desktop",
+        "url": "https://syncthing.net",
+        "github": "syncthing/syncthing",
+        "platforms": ["mac", "windows", "linux", "android"],
+        "free": true
+      },
+      {
+        "name": "Nextcloud",
+        "description": "Self-hosted cloud with files, calendar, contacts",
+        "license": "AGPL-3.0",
+        "type": "self-hosted",
+        "url": "https://nextcloud.com",
+        "github": "nextcloud/server",
+        "platforms": ["mac", "windows", "linux", "ios", "android", "web"],
+        "free": true
+      },
+      {
+        "name": "rclone",
+        "description": "CLI sync to any cloud provider or self-hosted storage",
+        "license": "MIT",
+        "type": "cli",
+        "url": "https://rclone.org",
+        "github": "rclone/rclone",
+        "platforms": ["mac", "windows", "linux"],
+        "free": true
+      }
+    ]
+  },
+  "1password": {
+    "display_name": "1Password",
+    "category": "Password Manager",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Bitwarden",
+        "description": "Cloud or self-hosted password manager, free tier available",
+        "license": "GPL-3.0",
+        "type": "desktop+web+self-hosted",
+        "url": "https://bitwarden.com",
+        "github": "bitwarden/clients",
+        "platforms": ["mac", "windows", "linux", "ios", "android", "web"],
+        "free": true
+      },
+      {
+        "name": "KeePassXC",
+        "description": "Local-only password manager, no cloud",
+        "license": "GPL-3.0",
+        "type": "desktop",
+        "url": "https://keepassxc.org",
+        "github": "keepassxc/keepassxc",
+        "platforms": ["mac", "windows", "linux"],
+        "free": true
+      }
+    ]
+  },
+  "lastpass": {
+    "display_name": "LastPass",
+    "category": "Password Manager",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Bitwarden",
+        "description": "Cloud or self-hosted password manager, free tier available",
+        "license": "GPL-3.0",
+        "type": "desktop+web+self-hosted",
+        "url": "https://bitwarden.com",
+        "github": "bitwarden/clients",
+        "platforms": ["mac", "windows", "linux", "ios", "android", "web"],
+        "free": true
+      },
+      {
+        "name": "KeePassXC",
+        "description": "Local-only password manager, no cloud",
+        "license": "GPL-3.0",
+        "type": "desktop",
+        "url": "https://keepassxc.org",
+        "github": "keepassxc/keepassxc",
+        "platforms": ["mac", "windows", "linux"],
+        "free": true
+      }
+    ]
+  },
+  "notion": {
+    "display_name": "Notion",
+    "category": "Notes & Productivity",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Obsidian",
+        "description": "Local markdown notes with graph view — free for personal use",
+        "license": "proprietary (free personal)",
+        "type": "desktop",
+        "url": "https://obsidian.md",
+        "platforms": ["mac", "windows", "linux", "ios", "android"],
+        "free": true
+      },
+      {
+        "name": "Logseq",
+        "description": "Local-first outliner / knowledge base",
+        "license": "AGPL-3.0",
+        "type": "desktop+web",
+        "url": "https://logseq.com",
+        "github": "logseq/logseq",
+        "platforms": ["mac", "windows", "linux", "ios", "android"],
+        "free": true
+      },
+      {
+        "name": "Joplin",
+        "description": "Markdown notes with E2E encryption and sync",
+        "license": "AGPL-3.0",
+        "type": "desktop",
+        "url": "https://joplinapp.org",
+        "github": "laurent22/joplin",
+        "platforms": ["mac", "windows", "linux", "ios", "android"],
+        "free": true
+      }
+    ]
+  },
+  "evernote": {
+    "display_name": "Evernote",
+    "category": "Notes",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Joplin",
+        "description": "Markdown notes with E2E encryption and sync",
+        "license": "AGPL-3.0",
+        "type": "desktop",
+        "url": "https://joplinapp.org",
+        "github": "laurent22/joplin",
+        "platforms": ["mac", "windows", "linux", "ios", "android"],
+        "free": true
+      },
+      {
+        "name": "Standard Notes",
+        "description": "End-to-end encrypted notes, free tier available",
+        "license": "AGPL-3.0",
+        "type": "desktop+web",
+        "url": "https://standardnotes.com",
+        "github": "standardnotes/app",
+        "platforms": ["mac", "windows", "linux", "ios", "android", "web"],
+        "free": true
+      }
+    ]
+  },
+  "adobe photoshop": {
+    "display_name": "Adobe Photoshop",
+    "category": "Image Editing",
+    "big_tech": true,
+    "alternatives": [
+      {
+        "name": "GIMP",
+        "description": "Full-featured raster image editor",
+        "license": "GPL-3.0",
+        "type": "desktop",
+        "url": "https://gimp.org",
+        "github": "GNOME/gimp",
+        "platforms": ["mac", "windows", "linux"],
+        "free": true
+      },
+      {
+        "name": "Krita",
+        "description": "Professional digital painting and illustration",
+        "license": "GPL-3.0",
+        "type": "desktop",
+        "url": "https://krita.org",
+        "github": "KDE/krita",
+        "platforms": ["mac", "windows", "linux", "android"],
+        "free": true
+      }
+    ]
+  },
+  "adobe illustrator": {
+    "display_name": "Adobe Illustrator",
+    "category": "Vector Design",
+    "big_tech": true,
+    "alternatives": [
+      {
+        "name": "Inkscape",
+        "description": "Full-featured SVG vector editor",
+        "license": "GPL-3.0",
+        "type": "desktop",
+        "url": "https://inkscape.org",
+        "github": "inkscape/inkscape",
+        "platforms": ["mac", "windows", "linux"],
+        "free": true
+      },
+      {
+        "name": "Penpot",
+        "description": "Open-source design & prototyping tool, self-hostable",
+        "license": "MPL-2.0",
+        "type": "web+self-hosted",
+        "url": "https://penpot.app",
+        "github": "penpot/penpot",
+        "platforms": ["web"],
+        "free": true
+      }
+    ]
+  },
+  "adobe premiere": {
+    "display_name": "Adobe Premiere Pro",
+    "category": "Video Editing",
+    "big_tech": true,
+    "alternatives": [
+      {
+        "name": "Kdenlive",
+        "description": "Non-linear video editor by KDE",
+        "license": "GPL-3.0",
+        "type": "desktop",
+        "url": "https://kdenlive.org",
+        "github": "KDE/kdenlive",
+        "platforms": ["mac", "windows", "linux"],
+        "free": true
+      },
+      {
+        "name": "DaVinci Resolve",
+        "description": "Professional editor/colour grader — robust free tier",
+        "license": "proprietary (free tier)",
+        "type": "desktop",
+        "url": "https://blackmagicdesign.com/products/davinciresolve",
+        "platforms": ["mac", "windows", "linux"],
+        "free": true
+      }
+    ]
+  },
+  "sketch": {
+    "display_name": "Sketch",
+    "category": "UI Design",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Penpot",
+        "description": "Open-source design & prototyping, self-hostable",
+        "license": "MPL-2.0",
+        "type": "web+self-hosted",
+        "url": "https://penpot.app",
+        "github": "penpot/penpot",
+        "platforms": ["web"],
+        "free": true
+      }
+    ]
+  },
+  "discord": {
+    "display_name": "Discord",
+    "category": "Community Chat",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Element",
+        "description": "Matrix client — federated, E2E encrypted",
+        "license": "Apache-2.0",
+        "type": "desktop+web+self-hosted",
+        "url": "https://element.io",
+        "github": "element-hq/element-web",
+        "platforms": ["mac", "windows", "linux", "ios", "android", "web"],
+        "free": true
+      },
+      {
+        "name": "Revolt",
+        "description": "Discord-like open-source chat platform",
+        "license": "AGPL-3.0",
+        "type": "web+desktop",
+        "url": "https://revolt.chat",
+        "github": "revoltchat/revolt",
+        "platforms": ["mac", "windows", "linux", "web"],
+        "free": true
+      }
+    ]
+  },
+  "microsoft office": {
+    "display_name": "Microsoft Office",
+    "category": "Office Suite",
+    "big_tech": true,
+    "alternatives": [
+      {
+        "name": "LibreOffice",
+        "description": "Full office suite: Writer, Calc, Impress, Draw",
+        "license": "MPL-2.0",
+        "type": "desktop",
+        "url": "https://libreoffice.org",
+        "github": "LibreOffice/core",
+        "platforms": ["mac", "windows", "linux"],
+        "free": true
+      },
+      {
+        "name": "OnlyOffice",
+        "description": "Office suite with .docx/.xlsx/.pptx compatibility",
+        "license": "AGPL-3.0",
+        "type": "desktop+web+self-hosted",
+        "url": "https://onlyoffice.com",
+        "github": "ONLYOFFICE/DocumentServer",
+        "platforms": ["mac", "windows", "linux", "ios", "android", "web"],
+        "free": true
+      }
+    ]
+  },
+  "alfred": {
+    "display_name": "Alfred",
+    "category": "Launcher / Productivity",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Raycast",
+        "description": "Fast launcher with extensions — free for individuals",
+        "license": "proprietary (free tier)",
+        "type": "desktop",
+        "url": "https://raycast.com",
+        "platforms": ["mac"],
+        "free": true
+      }
+    ]
+  },
+  "cleanmymac": {
+    "display_name": "CleanMyMac",
+    "category": "System Utility",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "OnyX",
+        "description": "Free macOS maintenance and optimisation utility",
+        "license": "freeware",
+        "type": "desktop",
+        "url": "https://titanium-software.fr/en/onyx.html",
+        "platforms": ["mac"],
+        "free": true
+      }
+    ]
+  },
+  "grammarly": {
+    "display_name": "Grammarly",
+    "category": "Writing Assistant",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "LanguageTool",
+        "description": "Self-hostable grammar checker, supports 30+ languages",
+        "license": "LGPL-2.1",
+        "type": "desktop+web+self-hosted",
+        "url": "https://languagetool.org",
+        "github": "languagetool-org/languagetool",
+        "platforms": ["mac", "windows", "linux", "web"],
+        "free": true
+      }
+    ]
+  },
+  "magnet": {
+    "display_name": "Magnet",
+    "category": "Window Management",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Rectangle",
+        "description": "Free, open-source window snapping for macOS",
+        "license": "MIT",
+        "type": "desktop",
+        "url": "https://rectangleapp.com",
+        "github": "rxhanson/Rectangle",
+        "platforms": ["mac"],
+        "free": true
+      }
+    ]
+  },
+  "bartender": {
+    "display_name": "Bartender",
+    "category": "Menu Bar Manager",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Ice",
+        "description": "Open-source menu bar manager",
+        "license": "MIT",
+        "type": "desktop",
+        "url": "https://github.com/jordanbaird/Ice",
+        "github": "jordanbaird/Ice",
+        "platforms": ["mac"],
+        "free": true
+      }
+    ]
+  },
+  "nordvpn": {
+    "display_name": "NordVPN",
+    "category": "VPN",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "ProtonVPN",
+        "description": "Zero-log VPN with a genuine free tier",
+        "license": "GPL-3.0 (client)",
+        "type": "desktop",
+        "url": "https://protonvpn.com",
+        "github": "ProtonVPN/ios-mac-app",
+        "platforms": ["mac", "windows", "linux", "ios", "android"],
+        "free": true
+      },
+      {
+        "name": "WireGuard",
+        "description": "Modern open-source VPN protocol — self-host a server",
+        "license": "GPL-2.0",
+        "type": "desktop+self-hosted",
+        "url": "https://wireguard.com",
+        "github": "WireGuard/wireguard-apple",
+        "platforms": ["mac", "windows", "linux", "ios", "android"],
+        "free": true
+      }
+    ]
+  },
+  "loom": {
+    "display_name": "Loom",
+    "category": "Screen Recording",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "OBS Studio",
+        "description": "Open-source screen capture and live streaming",
+        "license": "GPL-2.0",
+        "type": "desktop",
+        "url": "https://obsproject.com",
+        "github": "obsproject/obs-studio",
+        "platforms": ["mac", "windows", "linux"],
+        "free": true
+      }
+    ]
+  },
+  "superhuman": {
+    "display_name": "Superhuman",
+    "category": "Email",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Thunderbird",
+        "description": "Full-featured open-source email client",
+        "license": "MPL-2.0",
+        "type": "desktop",
+        "url": "https://thunderbird.net",
+        "github": "mozilla/releases-comm-central",
+        "platforms": ["mac", "windows", "linux"],
+        "free": true
+      },
+      {
+        "name": "Proton Mail",
+        "description": "End-to-end encrypted email — free tier available",
+        "license": "GPL-3.0 (clients)",
+        "type": "web+desktop",
+        "url": "https://proton.me/mail",
+        "github": "ProtonMail/WebClients",
+        "platforms": ["mac", "windows", "ios", "android", "web"],
+        "free": true
+      }
+    ]
+  },
+  "whatsapp": {
+    "display_name": "WhatsApp",
+    "category": "Messaging",
+    "big_tech": true,
+    "alternatives": [
+      {
+        "name": "Signal",
+        "description": "End-to-end encrypted messaging by a non-profit",
+        "license": "AGPL-3.0",
+        "type": "desktop",
+        "url": "https://signal.org",
+        "github": "signalapp/Signal-Desktop",
+        "platforms": ["mac", "windows", "linux", "ios", "android"],
+        "free": true
+      },
+      {
+        "name": "Element",
+        "description": "Matrix client — federated, E2E encrypted",
+        "license": "Apache-2.0",
+        "type": "desktop+web",
+        "url": "https://element.io",
+        "github": "element-hq/element-web",
+        "platforms": ["mac", "windows", "linux", "ios", "android", "web"],
+        "free": true
+      }
+    ]
+  },
+  "telegram": {
+    "display_name": "Telegram",
+    "category": "Messaging",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Signal",
+        "description": "End-to-end encrypted messaging by a non-profit",
+        "license": "AGPL-3.0",
+        "type": "desktop",
+        "url": "https://signal.org",
+        "github": "signalapp/Signal-Desktop",
+        "platforms": ["mac", "windows", "linux", "ios", "android"],
+        "free": true
+      }
+    ]
+  },
+  "todoist": {
+    "display_name": "Todoist",
+    "category": "Task Management",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Vikunja",
+        "description": "Self-hosted open-source task manager",
+        "license": "AGPL-3.0",
+        "type": "self-hosted+web",
+        "url": "https://vikunja.io",
+        "github": "go-vikunja/vikunja",
+        "platforms": ["mac", "windows", "linux", "ios", "android", "web"],
+        "free": true
+      },
+      {
+        "name": "Nextcloud Tasks",
+        "description": "CalDAV task management built into Nextcloud",
+        "license": "AGPL-3.0",
+        "type": "self-hosted",
+        "url": "https://apps.nextcloud.com/apps/tasks",
+        "platforms": ["web", "ios", "android"],
+        "free": true
+      }
+    ]
+  },
+  "things": {
+    "display_name": "Things 3",
+    "category": "Task Management",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Vikunja",
+        "description": "Self-hosted open-source task manager",
+        "license": "AGPL-3.0",
+        "type": "self-hosted+web",
+        "url": "https://vikunja.io",
+        "github": "go-vikunja/vikunja",
+        "platforms": ["web", "ios", "android"],
+        "free": true
+      }
+    ]
+  },
+  "iterm2": {
+    "display_name": "iTerm2",
+    "category": "Terminal Emulator",
+    "big_tech": false,
+    "alternatives": [
+      {
+        "name": "Alacritty",
+        "description": "GPU-accelerated terminal emulator",
+        "license": "Apache-2.0",
+        "type": "desktop",
+        "url": "https://alacritty.org",
+        "github": "alacritty/alacritty",
+        "platforms": ["mac", "windows", "linux"],
+        "free": true
+      },
+      {
+        "name": "kitty",
+        "description": "Fast, feature-rich GPU terminal",
+        "license": "GPL-3.0",
+        "type": "desktop",
+        "url": "https://sw.kovidgoyal.net/kitty",
+        "github": "kovidgoyal/kitty",
+        "platforms": ["mac", "linux"],
+        "free": true
+      }
+    ]
+  }
+}

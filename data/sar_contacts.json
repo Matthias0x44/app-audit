@@ -1,0 +1,251 @@
+{
+  "spotify": {
+    "display_name": "Spotify",
+    "privacy_email": "privacy@spotify.com",
+    "dpo_email": "dpo@spotify.com",
+    "deletion_url": "https://www.spotify.com/account/privacy/",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "Account deletion available in app settings or via website. SAR response usually via email within 30 days."
+  },
+  "google": {
+    "display_name": "Google",
+    "privacy_email": "",
+    "dpo_email": "",
+    "deletion_url": "https://myaccount.google.com/delete-services-or-account",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "Submit SAR via Google's Data & Privacy dashboard. No direct privacy email — uses web forms only.",
+    "sar_form": "https://support.google.com/policies/answer/9581826"
+  },
+  "chrome": {
+    "display_name": "Google Chrome",
+    "privacy_email": "",
+    "dpo_email": "",
+    "deletion_url": "https://myaccount.google.com/delete-services-or-account",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "Chrome sync data managed via Google account. Use Google's data export/deletion tools."
+  },
+  "adobe": {
+    "display_name": "Adobe",
+    "privacy_email": "privacy@adobe.com",
+    "dpo_email": "DPO@adobe.com",
+    "deletion_url": "https://account.adobe.com",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "Adobe responds to SARs via email. Account deletion through account portal."
+  },
+  "microsoft": {
+    "display_name": "Microsoft",
+    "privacy_email": "mspprivacy@microsoft.com",
+    "dpo_email": "",
+    "deletion_url": "https://account.microsoft.com/privacy",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "Microsoft Privacy Report available via account dashboard. SAR via email or web form.",
+    "sar_form": "https://aka.ms/privacyresponse"
+  },
+  "slack": {
+    "display_name": "Slack",
+    "privacy_email": "privacy@slack.com",
+    "dpo_email": "dpo@slack.com",
+    "deletion_url": "https://slack.com/help/articles/203953229",
+    "deletion_difficulty": "easy",
+    "compliant": true,
+    "notes": "Individual members can deactivate their own account. Workspace owners control data deletion."
+  },
+  "dropbox": {
+    "display_name": "Dropbox",
+    "privacy_email": "privacy@dropbox.com",
+    "dpo_email": "",
+    "deletion_url": "https://www.dropbox.com/account/delete",
+    "deletion_difficulty": "easy",
+    "compliant": true,
+    "notes": "Account deletion straightforward via settings. SAR via email."
+  },
+  "notion": {
+    "display_name": "Notion",
+    "privacy_email": "privacy@makenotion.com",
+    "dpo_email": "",
+    "deletion_url": "https://www.notion.so/help/delete-account",
+    "deletion_difficulty": "easy",
+    "compliant": true,
+    "notes": "Account deletion via Settings > My account > Delete account."
+  },
+  "discord": {
+    "display_name": "Discord",
+    "privacy_email": "privacy@discord.com",
+    "dpo_email": "",
+    "deletion_url": "https://discord.com/privacy",
+    "deletion_difficulty": "easy",
+    "compliant": true,
+    "notes": "Account deletion via User Settings > My Account. 14-day grace period before deletion is permanent.",
+    "sar_form": "https://discord.com/privacy"
+  },
+  "zoom": {
+    "display_name": "Zoom",
+    "privacy_email": "privacy@zoom.us",
+    "dpo_email": "",
+    "deletion_url": "https://zoom.us/profile",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "Account termination via account portal. Data deletion may take up to 30 days."
+  },
+  "1password": {
+    "display_name": "1Password",
+    "privacy_email": "privacy@1password.com",
+    "dpo_email": "dpo@1password.com",
+    "deletion_url": "https://support.1password.com/delete-account/",
+    "deletion_difficulty": "easy",
+    "compliant": true,
+    "notes": "Clear privacy policy with named DPO. Easy account deletion."
+  },
+  "lastpass": {
+    "display_name": "LastPass",
+    "privacy_email": "privacy@lastpass.com",
+    "dpo_email": "",
+    "deletion_url": "https://lastpass.com/delete_account.php",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "History of data breaches (2022). Account deletion via web portal."
+  },
+  "grammarly": {
+    "display_name": "Grammarly",
+    "privacy_email": "privacy@grammarly.com",
+    "dpo_email": "",
+    "deletion_url": "https://account.grammarly.com/delete",
+    "deletion_difficulty": "easy",
+    "compliant": true,
+    "notes": "Account deletion via account settings. Grammarly retains text samples for AI training unless opted out."
+  },
+  "nordvpn": {
+    "display_name": "NordVPN",
+    "privacy_email": "privacy@nordvpn.com",
+    "dpo_email": "dpo@nordvpn.com",
+    "deletion_url": "https://my.nordaccount.com",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "Contact support to delete account. Privacy contact available."
+  },
+  "facebook": {
+    "display_name": "Meta / Facebook",
+    "privacy_email": "",
+    "dpo_email": "",
+    "deletion_url": "https://www.facebook.com/help/delete_account",
+    "deletion_difficulty": "hard",
+    "compliant": true,
+    "notes": "No public privacy email. SAR via web form only. 30-day deletion delay. Data download via Settings > Your Facebook Information.",
+    "sar_form": "https://www.facebook.com/help/contact/540977946302970"
+  },
+  "instagram": {
+    "display_name": "Instagram (Meta)",
+    "privacy_email": "",
+    "dpo_email": "",
+    "deletion_url": "https://www.instagram.com/accounts/remove/request/permanent/",
+    "deletion_difficulty": "hard",
+    "compliant": true,
+    "notes": "No public privacy email. SAR via web form. Meta processes requests for both Facebook and Instagram.",
+    "sar_form": "https://www.instagram.com/accounts/login/?next=/privacy/requests/"
+  },
+  "twitter": {
+    "display_name": "X / Twitter",
+    "privacy_email": "privacy@twitter.com",
+    "dpo_email": "dpo@twitter.com",
+    "deletion_url": "https://twitter.com/settings/account/personalization",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "Account deactivation leads to 30-day grace period, then deletion. SAR via email."
+  },
+  "tiktok": {
+    "display_name": "TikTok",
+    "privacy_email": "privacy@tiktok.com",
+    "dpo_email": "eurepresentative@tiktok.com",
+    "deletion_url": "https://www.tiktok.com/setting",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "EU users have a dedicated representative contact. Account deletion via app settings."
+  },
+  "linkedin": {
+    "display_name": "LinkedIn (Microsoft)",
+    "privacy_email": "privacy@linkedin.com",
+    "dpo_email": "",
+    "deletion_url": "https://www.linkedin.com/help/linkedin/ask/TS-Derasure",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "Data export via Settings & Privacy > Data Privacy. Account closure via settings.",
+    "sar_form": "https://www.linkedin.com/help/linkedin/ask/TS-DASR"
+  },
+  "github": {
+    "display_name": "GitHub (Microsoft)",
+    "privacy_email": "privacy@github.com",
+    "dpo_email": "",
+    "deletion_url": "https://github.com/settings/admin",
+    "deletion_difficulty": "easy",
+    "compliant": true,
+    "notes": "Account deletion via settings. Public repositories/forks may persist per others' forks."
+  },
+  "atlassian": {
+    "display_name": "Atlassian (Jira/Confluence/Trello)",
+    "privacy_email": "privacy@atlassian.com",
+    "dpo_email": "dpo@atlassian.com",
+    "deletion_url": "https://id.atlassian.com/manage-profile/delete-account",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "Single Atlassian account covers Jira, Confluence, Trello. Named DPO available."
+  },
+  "shopify": {
+    "display_name": "Shopify",
+    "privacy_email": "privacy@shopify.com",
+    "dpo_email": "dpo@shopify.com",
+    "deletion_url": "https://help.shopify.com/en/manual/your-account/close-account",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "Store closure via admin panel. Customer data erasure available for merchants to action."
+  },
+  "loom": {
+    "display_name": "Loom",
+    "privacy_email": "privacy@loom.com",
+    "dpo_email": "",
+    "deletion_url": "https://support.loom.com/hc/en-us/articles/360024373131",
+    "deletion_difficulty": "easy",
+    "compliant": true,
+    "notes": "Account deletion via Settings > Account. Videos must be deleted first."
+  },
+  "figma": {
+    "display_name": "Figma (Adobe)",
+    "privacy_email": "privacy@figma.com",
+    "dpo_email": "",
+    "deletion_url": "https://help.figma.com/hc/en-us/articles/360039827194",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "Acquired by Adobe 2024. Account deletion via settings. Shared files may remain visible to collaborators."
+  },
+  "miro": {
+    "display_name": "Miro",
+    "privacy_email": "privacy@miro.com",
+    "dpo_email": "dpo@miro.com",
+    "deletion_url": "https://miro.com/legal/privacy-policy/",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "SAR via email. Account deletion through support."
+  },
+  "anydesk": {
+    "display_name": "AnyDesk",
+    "privacy_email": "",
+    "dpo_email": "",
+    "deletion_url": "",
+    "deletion_difficulty": "hard",
+    "compliant": false,
+    "notes": "No publicly listed privacy email or DPO contact found as of 2026. Potential GDPR Art. 37 issue for EU users."
+  },
+  "teamviewer": {
+    "display_name": "TeamViewer",
+    "privacy_email": "privacy@teamviewer.com",
+    "dpo_email": "dpo@teamviewer.com",
+    "deletion_url": "https://community.teamviewer.com/English/kb/articles/4646-how-to-delete-a-teamviewer-account",
+    "deletion_difficulty": "medium",
+    "compliant": true,
+    "notes": "Named DPO available. Account deletion via community portal."
+  }
+}
