@@ -32,19 +32,65 @@ def _run(cmd: list, timeout: int = 10) -> str:
         return ""
 
 
-def _get_last_used(path: str) -> Optional[datetime]:
+def _get_bundle_id(path: str) -> Optional[str]:
+    out = _run(["mdls", "-name", "kMDItemCFBundleIdentifier", "-raw", path])
+    if out and out != "(null)":
+        return out
+    # Spotlight sometimes doesn't index this; read Info.plist directly as fallback
+    plist = os.path.join(path, "Contents", "Info.plist")
+    if os.path.exists(plist):
+        out = _run(["/usr/libexec/PlistBuddy", "-c", "Print :CFBundleIdentifier", plist])
+        if out and not out.startswith("Print:") and not out.startswith("Error"):
+            return out
+    return None
+
+
+def _latest_mtime(paths: list) -> Optional[datetime]:
+    dates = []
+    for p in paths:
+        try:
+            if p.exists():
+                dates.append(datetime.fromtimestamp(p.stat().st_mtime))
+        except Exception:
+            pass
+    return max(dates) if dates else None
+
+
+def _get_last_used(
+    path: str,
+    bundle_id: Optional[str] = None,
+    app_name: Optional[str] = None,
+) -> Optional[datetime]:
+    # Primary: Spotlight metadata on the .app bundle
     out = _run(["mdls", "-name", "kMDItemLastUsedDate", "-raw", path])
     if out and out != "(null)":
         try:
             return datetime.strptime(out[:19], "%Y-%m-%d %H:%M:%S")
         except ValueError:
             pass
-    return None
 
+    # Fallback: per-app data directories macOS updates on every launch.
+    # Sandboxed (App Store) apps don't reliably update kMDItemLastUsedDate,
+    # but their Containers / SavedState / Preferences entries always get touched.
+    # Electron apps (e.g. Claude, Slack) often use the app name rather than
+    # the bundle ID as their Application Support folder name.
+    lib = Path.home() / "Library"
+    candidates = []
 
-def _get_bundle_id(path: str) -> Optional[str]:
-    out = _run(["mdls", "-name", "kMDItemCFBundleIdentifier", "-raw", path])
-    return out if out and out != "(null)" else None
+    if bundle_id:
+        candidates += [
+            lib / "Containers" / bundle_id,
+            lib / "Saved Application State" / f"{bundle_id}.savedState",
+            lib / "Application Support" / bundle_id,
+            lib / "Preferences" / f"{bundle_id}.plist",
+        ]
+
+    if app_name:
+        candidates += [
+            lib / "Application Support" / app_name,
+        ]
+
+    return _latest_mtime(candidates) if candidates else None
 
 
 def scan_applications() -> List[AppInfo]:
@@ -57,8 +103,8 @@ def scan_applications() -> List[AppInfo]:
                 continue
             path = os.path.join(base, entry)
             app = AppInfo(name=entry[:-4], path=path, source="applications")
-            app.last_used = _get_last_used(path)
             app.bundle_id = _get_bundle_id(path)
+            app.last_used = _get_last_used(path, app.bundle_id, entry[:-4])
             apps.append(app)
     return apps
 
