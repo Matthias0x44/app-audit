@@ -1,0 +1,45 @@
+{
+  "_meta": {
+    "note": "Rules for classifying receipt emails. Aggregators (Apple/Stripe/PayPal) bill on behalf of other merchants, so the real service name lives in the subject or body, not the sender. Merchants bill directly. Ignore-list senders are recurring non-subscriptions (rides, food, transfers, newsletters)."
+  },
+  "aggregators": {
+    "email.apple.com": { "name": "Apple", "via": "App Store", "merchant_from": "apple_body" },
+    "stripe.com": { "name": "Stripe", "via": "Stripe", "merchant_from": "subject_from" },
+    "paypal.co.uk": { "name": "PayPal", "via": "PayPal", "merchant_from": "subject_to" },
+    "paypal.com": { "name": "PayPal", "via": "PayPal", "merchant_from": "subject_to" },
+    "google.com": { "name": "Google Play", "via": "Google Play", "merchant_from": "body_google" }
+  },
+  "merchants": {
+    "smarty.co.uk": { "name": "SMARTY", "category": "Mobile" },
+    "vercel.com": { "name": "Vercel", "category": "Developer" },
+    "spotify.com": { "name": "Spotify", "category": "Music" },
+    "netflix.com": { "name": "Netflix", "category": "Streaming" },
+    "openai.com": { "name": "OpenAI", "category": "AI" },
+    "anthropic.com": { "name": "Anthropic", "category": "AI" },
+    "github.com": { "name": "GitHub", "category": "Developer" },
+    "notion.so": { "name": "Notion", "category": "Productivity" },
+    "dropbox.com": { "name": "Dropbox", "category": "Storage" },
+    "adobe.com": { "name": "Adobe", "category": "Creative" },
+    "disneyplus.com": { "name": "Disney+", "category": "Streaming" },
+    "nordvpn.com": { "name": "NordVPN", "category": "VPN" },
+    "proton.me": { "name": "Proton", "category": "Privacy" },
+    "1password.com": { "name": "1Password", "category": "Security" },
+    "linear.app": { "name": "Linear", "category": "Productivity" },
+    "figma.com": { "name": "Figma", "category": "Design" }
+  },
+  "ignore_senders": [
+    "uber.com", "ubereats.com", "jdwetherspoon.co.uk", "loungers.co.uk",
+    "sizzlingpubs.co.uk", "thetrainline.com", "trainline.com", "trading212.com",
+    "substack.com", "myheritage.com", "printemps.com", "codeweavers.com",
+    "amazon.co.uk", "amazon.com", "deliveroo.co.uk", "justeat.co.uk"
+  ],
+  "receipt_keywords": [
+    "receipt", "invoice", "subscription", "renews", "renewed", "payment received",
+    "your plan", "auto-renew", "another month", "has been charged", "billing"
+  ],
+  "recurrence_keywords": [
+    "monthly", "renews", "renewed", "another month", "subscription",
+    "recurring", "/month", "per month", "annually", "yearly", "/year", "annual"
+  ],
+  "yearly_keywords": ["annually", "yearly", "/year", "per year", "annual plan"]
+}

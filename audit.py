@@ -743,6 +743,105 @@ def privacy(
 
 
 # ---------------------------------------------------------------------------
+# email-scan
+# ---------------------------------------------------------------------------
+
+@app.command(name="email-scan")
+def email_scan_cmd(
+    source: str = typer.Option("emlx", "--source", "-s", help="emlx | mbox | imap"),
+    path: Optional[str] = typer.Option(None, "--path", "-p", help="Path to .mbox file or Mail dir"),
+    days: int = typer.Option(60, "--days", "-d", help="Only scan emails newer than this"),
+):
+    """Find recurring subscriptions from email receipts (Apple/Stripe/PayPal/direct).
+
+    Sources:
+      emlx  Apple Mail local store (~/Library/Mail) — fully offline (default)
+      mbox  A .mbox export (Gmail Takeout, Thunderbird) — pass --path
+      imap  Live read-only IMAP — set APPAUDIT_IMAP_HOST / _USER / _PASS env vars
+    """
+    import email_scan as es
+
+    since = datetime.now() - timedelta(days=days)
+
+    try:
+        if source == "mbox":
+            if not path:
+                console.print("[red]--path to a .mbox file is required for source=mbox[/red]")
+                raise typer.Exit(1)
+            records = es.read_mbox(path, since)
+        elif source == "imap":
+            host = os.environ.get("APPAUDIT_IMAP_HOST")
+            user = os.environ.get("APPAUDIT_IMAP_USER")
+            pw = os.environ.get("APPAUDIT_IMAP_PASS")
+            if not (host and user and pw):
+                console.print(
+                    "[yellow]Set APPAUDIT_IMAP_HOST, APPAUDIT_IMAP_USER and "
+                    "APPAUDIT_IMAP_PASS (an app-specific password) to use IMAP.[/yellow]"
+                )
+                raise typer.Exit(1)
+            console.print("[dim]Connecting (read-only)…[/dim]")
+            records = es.read_imap(host, user, pw, since)
+        else:  # emlx
+            records = es.read_emlx_dir(path, since)
+            if not records:
+                console.print(
+                    "[yellow]No Apple Mail messages found. If you use webmail, export "
+                    "a .mbox (Gmail Takeout) and run with --source mbox --path file.mbox[/yellow]"
+                )
+                return
+    except Exception as exc:
+        console.print(f"[red]Could not read emails: {exc}[/red]")
+        raise typer.Exit(1)
+
+    detections = es.scan(records)
+    if not detections:
+        console.print(f"[yellow]No subscriptions detected in {len(records)} emails.[/yellow]")
+        return
+
+    table = Table(
+        title=f"Subscriptions from email receipts  ({len(records)} emails, last {days}d)",
+        box=box.ROUNDED, show_lines=True,
+    )
+    table.add_column("Service", style="bold", min_width=22)
+    table.add_column("Amount", justify="right", width=10)
+    table.add_column("Cadence", width=9)
+    table.add_column("Billed via", width=11)
+    table.add_column("Last seen", width=12)
+    table.add_column("Conf.", width=7)
+
+    for d in detections:
+        amt = f"{d.currency}{d.amount:.2f}" if d.amount is not None else "[dim]—[/dim]"
+        seen = _relative_time(d.last_seen) if d.last_seen else "[dim]?[/dim]"
+        ccol = {"high": "green", "medium": "yellow", "low": "dim"}.get(d.confidence, "dim")
+        table.add_row(
+            d.merchant, amt, d.cadence, d.via, seen,
+            f"[{ccol}]{d.confidence}[/{ccol}]",
+        )
+
+    console.print(table)
+    totals = es.monthly_total(detections)
+    tstr = ", ".join(f"[bold]{c}{v:.2f}[/bold]" for c, v in totals.items())
+    console.print(f"\nEstimated monthly: {tstr}")
+
+    # Surface duplicate billing — the same merchant via two channels.
+    by_name: dict = {}
+    for d in detections:
+        by_name.setdefault(d.merchant.lower(), []).append(d)
+    for name, group in by_name.items():
+        if len({g.via for g in group}) > 1:
+            vias = ", ".join(sorted({g.via for g in group}))
+            console.print(
+                f"[yellow]⚠ '{group[0].merchant}' is billed via multiple channels "
+                f"({vias}) — check you're not paying twice.[/yellow]"
+            )
+
+    console.print(
+        "[dim]Amounts come from the receipts themselves, not a price list. "
+        "Some senders omit the amount.[/dim]"
+    )
+
+
+# ---------------------------------------------------------------------------
 # export-dataset
 # ---------------------------------------------------------------------------
 

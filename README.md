@@ -86,6 +86,29 @@ python3 audit.py subscriptions
 python3 audit.py subscriptions --days 60      # stricter "unused" threshold
 ```
 
+### Email receipt scan
+
+Finds recurring subscriptions from email receipts — including ones billed through
+Apple, Stripe, or PayPal that never match an installed app (most of them). Reads
+mail locally; nothing is uploaded.
+
+```
+python3 audit.py email-scan                                  # Apple Mail (offline, default)
+python3 audit.py email-scan --source mbox --path all.mbox    # Gmail Takeout / Thunderbird export
+python3 audit.py email-scan --source imap                    # live, read-only (see below)
+python3 audit.py email-scan --days 90                         # widen the look-back window
+```
+
+Sources:
+- **emlx** — scans the Apple Mail store at `~/Library/Mail`. Fully offline.
+- **mbox** — any `.mbox` export. Webmail users can export via Gmail Takeout.
+- **imap** — live read-only connection. Set `APPAUDIT_IMAP_HOST`, `APPAUDIT_IMAP_USER`,
+  and `APPAUDIT_IMAP_PASS` (an app-specific password — never your main password).
+
+It extracts the amount actually charged from each receipt, groups recurring
+charges, and flags any merchant billed through more than one channel (e.g. paying
+for the same service via both Apple and Stripe).
+
 ### Privacy grades
 
 Shows a privacy grade computed **locally** from cited facts (open-source status,
@@ -154,6 +177,7 @@ Two plain JSON files power the tool — contributions welcome.
 | `data/categories.json` | App categories (keyword lists) powering overlap detection |
 | `data/subscriptions.json` | Indicative public subscription prices and cancel links |
 | `data/privacy_scores.json` | Cited privacy attributes (trackers, ToS;DR grade, etc.) per app |
+| `data/receipt_senders.json` | Aggregator/merchant rules for email receipt detection |
 
 To add an entry, follow the existing format and open a PR.
 

@@ -162,6 +162,7 @@ tr:hover td { background: var(--panel); }
 .summary .warn { color: var(--red); }
 
 .hint { font-size: 11px; color: var(--text-dim); margin-top: 8px; line-height: 1.5; }
+.hint.warn { color: var(--red); font-size: 12px; margin: 4px 0; }
 .toolbar { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
 .copied { font-size: 11px; color: var(--green); }
 .link { color: var(--accent); cursor: pointer; text-decoration: none; }

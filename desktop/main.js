@@ -9,6 +9,7 @@ const titles = {
   scan: "Installed apps",
   overlap: "Overlap",
   subscriptions: "Subscriptions",
+  emailscan: "Email scan",
   privacy: "Privacy grades",
   alternatives: "Alternatives",
   caches: "Caches",
@@ -22,6 +23,7 @@ const state = {
   alternativesQuery: "",
   cachesOrphanedOnly: false,
   gdpr: { app: "", type: "erasure", name: "", email: "" },
+  emailscan: { source: "emlx", path: "", days: 60 },
 };
 
 async function runApi(command, args = {}) {
@@ -146,6 +148,73 @@ const views = {
         <thead><tr><th>Subscription</th><th>Est. /mo</th><th>Last used</th><th>Verdict</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
+  },
+
+  async emailscan() {
+    const e = state.emailscan;
+    body().innerHTML = `
+      <div class="card form-card">
+        <label>Source
+          <select id="es-source" class="text-input">
+            <option value="emlx"${e.source === "emlx" ? " selected" : ""}>Apple Mail (offline, ~/Library/Mail)</option>
+            <option value="mbox"${e.source === "mbox" ? " selected" : ""}>.mbox export (Gmail Takeout / Thunderbird)</option>
+            <option value="imap"${e.source === "imap" ? " selected" : ""}>IMAP (read-only, via env vars)</option>
+          </select></label>
+        <label id="es-path-row" style="${e.source === "mbox" ? "" : "display:none"}">Path to .mbox file
+          <input id="es-path" class="text-input" value="${esc(e.path)}" placeholder="/Users/you/Downloads/all.mbox" /></label>
+        <label>Look back (days)
+          <input id="es-days" class="text-input" type="number" value="${e.days}" style="max-width:120px" /></label>
+        <button class="btn btn-primary" id="es-go">Scan receipts</button>
+        <div class="hint">Reads receipts locally and extracts what you were actually charged —
+        including subscriptions billed through Apple, Stripe, or PayPal that never match an installed app.
+        For IMAP, set APPAUDIT_IMAP_HOST / _USER / _PASS (an app password) before launching.</div>
+      </div>
+      <div id="es-result"></div>`;
+
+    const sourceSel = document.getElementById("es-source");
+    sourceSel.onchange = () => {
+      e.source = sourceSel.value;
+      document.getElementById("es-path-row").style.display = e.source === "mbox" ? "" : "none";
+    };
+
+    document.getElementById("es-go").onclick = async () => {
+      e.source = sourceSel.value;
+      e.path = document.getElementById("es-path").value.trim();
+      e.days = parseInt(document.getElementById("es-days").value, 10) || 60;
+      const out = document.getElementById("es-result");
+      out.innerHTML = '<div class="placeholder">Scanning receipts…</div>';
+      try {
+        const d = await runApi("email_scan", { source: e.source, path: e.path, days: e.days });
+        if (!d.detections.length) {
+          out.innerHTML = `<div class="placeholder">No subscriptions found in ${d.emails_scanned} emails.</div>`;
+          return;
+        }
+        const totals = Object.entries(d.totals).map(([c, v]) => `${c}${v.toFixed(2)}`).join(" + ");
+        const dupes = d.duplicates.map((x) =>
+          `<div class="hint warn">⚠ ${esc(x.merchant)} is billed via ${esc(x.channels.join(", "))} — check you're not paying twice.</div>`).join("");
+        const rows = d.detections.map((x) => `
+          <tr>
+            <td class="app-name">${esc(x.merchant)}</td>
+            <td>${x.amount != null ? esc(x.currency) + x.amount.toFixed(2) : '<span class="dim">—</span>'}</td>
+            <td class="dim">${esc(x.cadence)}</td>
+            <td>${esc(x.via)}</td>
+            <td><span class="chip grade-${x.confidence === "high" ? "A" : x.confidence === "low" ? "F" : "C"}">${esc(x.confidence)}</span></td>
+          </tr>`).join("");
+        out.innerHTML = `
+          <div class="summary">
+            Found <span class="big">${d.detections.length}</span> subscriptions
+            in ${d.emails_scanned} emails · est. <span class="big">${totals}/mo</span>
+          </div>
+          ${dupes}
+          <table>
+            <thead><tr><th>Service</th><th>Amount</th><th>Cadence</th><th>Billed via</th><th>Confidence</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <div class="hint">Amounts come from the receipts themselves, not a price list. Some senders omit the amount.</div>`;
+      } catch (err) {
+        out.innerHTML = `<div class="error">${esc(err.message)}</div>`;
+      }
+    };
   },
 
   async privacy() {

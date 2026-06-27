@@ -272,6 +272,60 @@ def cmd_noncompliant(args):
     return out
 
 
+def cmd_email_scan(args):
+    import os
+    from datetime import timedelta
+    import email_scan as es
+
+    days = args.get("days", 60)
+    source = args.get("source", "emlx")
+    path = args.get("path")
+    since = datetime.now() - timedelta(days=days)
+
+    if source == "mbox":
+        if not path:
+            raise ValueError("source=mbox requires 'path' to a .mbox file")
+        records = es.read_mbox(path, since)
+    elif source == "imap":
+        host = os.environ.get("APPAUDIT_IMAP_HOST")
+        user = os.environ.get("APPAUDIT_IMAP_USER")
+        pw = os.environ.get("APPAUDIT_IMAP_PASS")
+        if not (host and user and pw):
+            raise ValueError("set APPAUDIT_IMAP_HOST/_USER/_PASS env vars for IMAP")
+        records = es.read_imap(host, user, pw, since)
+    else:
+        records = es.read_emlx_dir(path, since)
+
+    detections = es.scan(records)
+
+    # Flag merchants billed through more than one channel (possible double-pay).
+    by_name: dict = {}
+    for d in detections:
+        by_name.setdefault(d.merchant.lower(), []).append(d)
+    duplicates = [
+        {"merchant": g[0].merchant, "channels": sorted({x.via for x in g})}
+        for g in by_name.values() if len({x.via for x in g}) > 1
+    ]
+
+    return {
+        "emails_scanned": len(records),
+        "detections": [
+            {
+                "merchant": d.merchant,
+                "amount": d.amount,
+                "currency": d.currency,
+                "cadence": d.cadence,
+                "via": d.via,
+                "last_seen": _iso(d.last_seen),
+                "confidence": d.confidence,
+            }
+            for d in detections
+        ],
+        "totals": es.monthly_total(detections),
+        "duplicates": duplicates,
+    }
+
+
 def cmd_export_dataset(args):
     from dataset import write_dataset
     sar_db = _load(SAR_CONTACTS_DB)
@@ -298,6 +352,7 @@ COMMANDS = {
     "sar": cmd_sar,
     "noncompliant": cmd_noncompliant,
     "export_dataset": cmd_export_dataset,
+    "email_scan": cmd_email_scan,
 }
 
 
