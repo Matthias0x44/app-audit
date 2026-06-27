@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>app-audit</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <nav id="sidebar">
+      <div class="brand">app-audit</div>
+      <button class="nav-item active" data-view="scan">Installed apps</button>
+      <button class="nav-item" data-view="overlap">Overlap</button>
+      <button class="nav-item" data-view="subscriptions">Subscriptions</button>
+      <button class="nav-item" data-view="privacy">Privacy grades</button>
+      <button class="nav-item" data-view="caches">Caches</button>
+      <div class="nav-spacer"></div>
+      <div class="nav-foot">Local-only · nothing leaves your Mac</div>
+    </nav>
+    <main id="content">
+      <div id="view-header">
+        <h1 id="view-title">Installed apps</h1>
+        <button id="refresh" title="Re-run">Refresh</button>
+      </div>
+      <div id="view-body">
+        <div class="placeholder">Loading…</div>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

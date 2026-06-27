@@ -4,6 +4,10 @@ AI-assisted app audit tool for macOS. Find what to uninstall, get FOSS alternati
 
 **macOS only · Python 3.8+ · No account required**
 
+> **CLI + desktop.** The Python CLI below is the full tool. A native desktop
+> shell (Tauri + Python sidecar) lives in [`desktop/`](desktop/) — run it with
+> `cargo tauri dev`. See [desktop/README.md](desktop/README.md).
+
 ---
 
 ## Install
