@@ -27,6 +27,7 @@ ALTERNATIVES_DB = DATA_DIR / "alternatives.json"
 SAR_CONTACTS_DB = DATA_DIR / "sar_contacts.json"
 CATEGORIES_DB = DATA_DIR / "categories.json"
 SUBSCRIPTIONS_DB = DATA_DIR / "subscriptions.json"
+PRIVACY_SCORES_DB = DATA_DIR / "privacy_scores.json"
 
 
 def _load(path: Path) -> dict:
@@ -57,6 +58,19 @@ def _relative_time(dt: datetime) -> str:
     if days < 365:
         return f"{days // 30}mo ago"
     return f"{days // 365}y ago"
+
+
+def _privacy_grade(name: str) -> Optional[str]:
+    """Return a coloured grade chip for an app name, or None if not scored."""
+    import privacy
+
+    db = _load(PRIVACY_SCORES_DB)
+    key = _match(name, {k: v for k, v in db.items() if k != "_meta"})
+    if not key:
+        return None
+    grade, _, _ = privacy.score(db[key])
+    colour = privacy.GRADE_COLOUR.get(grade, "dim")
+    return f"[{colour}]{grade}[/{colour}]"
 
 
 # ---------------------------------------------------------------------------
@@ -246,10 +260,12 @@ def alternatives(app_name: str = typer.Argument(..., help="App name to look up")
         return
 
     entry = alts_db[key]
+    orig_grade = _privacy_grade(entry.get("display_name", key)) or "[dim]—[/dim]"
     console.print(Panel(
         f"[bold]{entry.get('display_name', key)}[/bold]\n"
         f"Category: {entry.get('category', '—')}  ·  "
-        f"Big Tech: {'[red]Yes[/red]' if entry.get('big_tech') else '[green]No[/green]'}",
+        f"Big Tech: {'[red]Yes[/red]' if entry.get('big_tech') else '[green]No[/green]'}  ·  "
+        f"Privacy grade: {orig_grade}",
         expand=False,
     ))
 
@@ -260,15 +276,17 @@ def alternatives(app_name: str = typer.Argument(..., help="App name to look up")
 
     table = Table(box=box.ROUNDED, show_lines=True)
     table.add_column("Name", style="bold", width=18)
+    table.add_column("Privacy", width=8, justify="center")
     table.add_column("Type", width=13)
     table.add_column("License", width=14)
-    table.add_column("Platforms", min_width=28)
+    table.add_column("Platforms", min_width=26)
     table.add_column("Free", width=6)
     table.add_column("Description")
 
     for alt in alts:
         table.add_row(
             alt["name"],
+            _privacy_grade(alt["name"]) or "[dim]—[/dim]",
             alt.get("type", ""),
             alt.get("license", ""),
             ", ".join(alt.get("platforms", [])),
@@ -277,6 +295,10 @@ def alternatives(app_name: str = typer.Argument(..., help="App name to look up")
         )
 
     console.print(table)
+    console.print(
+        "[dim]Privacy grades are computed locally from cited facts — "
+        "see [bold]audit privacy <app>[/bold] for the breakdown.[/dim]"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -644,6 +666,229 @@ def clean(
     console.print(f"[green]Cleared {cleared} item(s), freed {format_size(freed)}.[/green]")
     for err in errors:
         console.print(f"[yellow]  skipped {err}[/yellow]")
+
+
+# ---------------------------------------------------------------------------
+# privacy
+# ---------------------------------------------------------------------------
+
+@app.command()
+def privacy(
+    app_name: Optional[str] = typer.Argument(None, help="App to inspect (omit to grade all installed apps)"),
+):
+    """Show a cited privacy grade — for one app, or every installed app we score."""
+    import privacy as privacy_mod
+
+    db = _load(PRIVACY_SCORES_DB)
+    scored = {k: v for k, v in db.items() if k != "_meta"}
+
+    if app_name:
+        key = _match(app_name, scored)
+        if not key:
+            console.print(f"[yellow]No privacy data for '{app_name}'.[/yellow]")
+            console.print("[dim]Contribute one to data/privacy_scores.json.[/dim]")
+            return
+        entry = scored[key]
+        grade, points, reasons = privacy_mod.score(entry)
+        colour = privacy_mod.GRADE_COLOUR.get(grade, "dim")
+
+        console.print(Panel(
+            f"[bold]{entry.get('display_name', key)}[/bold]\n"
+            f"Privacy grade: [{colour}]{grade}[/{colour}]  ({points:+d} points)",
+            expand=False,
+        ))
+        console.print("[bold]How this grade was computed:[/bold]")
+        for r in reasons:
+            console.print(f"  {r}")
+        if entry.get("notes"):
+            console.print(f"\n[dim]{entry['notes']}[/dim]")
+        srcs = ", ".join(entry.get("sources", []))
+        if srcs:
+            console.print(f"[dim]Sources: {srcs}[/dim]")
+        return
+
+    # No app given: grade every installed app we have data for.
+    from scanner import scan_all
+
+    apps = scan_all()
+    rows = []
+    for a in apps:
+        key = _match(a.name, scored)
+        if key:
+            grade, points, _ = privacy_mod.score(scored[key])
+            rows.append((a.name, grade, points))
+
+    if not rows:
+        console.print("[yellow]None of your installed apps are in the privacy database yet.[/yellow]")
+        return
+
+    rows.sort(key=lambda r: r[2])  # worst privacy first
+
+    table = Table(
+        title="Privacy Grades — Installed Apps (worst first)",
+        box=box.ROUNDED,
+        caption=db.get("_meta", {}).get("note", ""),
+        caption_justify="left",
+    )
+    table.add_column("App", style="bold", min_width=22)
+    table.add_column("Grade", width=7, justify="center")
+    table.add_column("Score", width=7, justify="right")
+
+    for name, grade, points in rows:
+        colour = privacy_mod.GRADE_COLOUR.get(grade, "dim")
+        table.add_row(name, f"[{colour}]{grade}[/{colour}]", f"{points:+d}")
+
+    console.print(table)
+    console.print("[dim]Breakdown for any app: [bold]audit privacy <app>[/bold][/dim]")
+
+
+# ---------------------------------------------------------------------------
+# export-dataset
+# ---------------------------------------------------------------------------
+
+@app.command(name="export-dataset")
+def export_dataset(
+    output_dir: Path = typer.Option(Path("output"), "--output", "-o", help="Directory to write the dataset"),
+):
+    """Export the curated privacy-contact dataset as a public, citable artifact.
+
+    Emits CSV, JSON, and a markdown summary covering every company in the
+    database — independent of your installed apps — so the non-compliance list
+    can be handed to journalists, regulators, or digital-rights groups.
+    """
+    import csv
+
+    sar_db = _load(SAR_CONTACTS_DB)
+    if not sar_db:
+        console.print("[yellow]No privacy-contact data to export.[/yellow]")
+        return
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y-%m-%d")
+
+    fields = [
+        "company", "compliant", "has_privacy_email", "has_dpo_email",
+        "has_sar_form", "contact_method", "has_deletion_url",
+        "deletion_difficulty", "privacy_email", "dpo_email",
+        "deletion_url", "sar_form", "notes",
+    ]
+    records = []
+    for key, c in sorted(sar_db.items()):
+        has_email = bool(c.get("privacy_email")) or bool(c.get("dpo_email"))
+        has_form = bool(c.get("sar_form"))
+        # Distinguish a real contact gap from a web-form-only process: a company
+        # reachable via a SAR web form is not "no contact", just not by email.
+        if has_email:
+            method = "email"
+        elif has_form:
+            method = "web-form only"
+        else:
+            method = "none found"
+        records.append({
+            "company": c.get("display_name", key),
+            "compliant": c.get("compliant", True),
+            "has_privacy_email": bool(c.get("privacy_email")),
+            "has_dpo_email": bool(c.get("dpo_email")),
+            "has_sar_form": has_form,
+            "contact_method": method,
+            "has_deletion_url": bool(c.get("deletion_url")),
+            "deletion_difficulty": c.get("deletion_difficulty", "unknown"),
+            "privacy_email": c.get("privacy_email", ""),
+            "dpo_email": c.get("dpo_email", ""),
+            "deletion_url": c.get("deletion_url", ""),
+            "sar_form": c.get("sar_form", ""),
+            "notes": c.get("notes", ""),
+        })
+
+    non_compliant = [r for r in records if not r["compliant"]]
+    # A genuine contact gap = no email, no DPO, and no SAR web form.
+    no_contact = [r for r in records if r["contact_method"] == "none found"]
+    web_form_only = [r for r in records if r["contact_method"] == "web-form only"]
+
+    # JSON
+    json_path = output_dir / f"privacy-contacts-{stamp}.json"
+    json_path.write_text(json.dumps({
+        "generated": stamp,
+        "methodology": "Compiled from public privacy policies and DPA registrations. "
+                       "A company is flagged as a contact gap only when no email, DPO, "
+                       "or SAR web form is discoverable. Web-form-only companies are "
+                       "recorded separately, not flagged as non-compliant.",
+        "total": len(records),
+        "non_compliant": len(non_compliant),
+        "no_discoverable_contact": len(no_contact),
+        "web_form_only": len(web_form_only),
+        "records": records,
+    }, indent=2))
+
+    # CSV
+    csv_path = output_dir / f"privacy-contacts-{stamp}.csv"
+    with open(csv_path, "w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(records)
+
+    # Markdown summary
+    md_path = output_dir / f"privacy-contacts-{stamp}.md"
+    lines = [
+        f"# Privacy Contact Dataset — {stamp}",
+        "",
+        f"- **Companies tracked:** {len(records)}",
+        f"- **Confirmed non-compliant:** {len(non_compliant)}",
+        f"- **No discoverable contact (no email, DPO, or web form):** {len(no_contact)}",
+        f"- **Web-form-only (reachable, but no direct email):** {len(web_form_only)}",
+        "",
+        "_Methodology: compiled from public privacy policies and DPA registrations. "
+        "A company is flagged as a contact gap only when no email, DPO, or SAR web "
+        "form is discoverable. Web-form-only companies are listed separately, not "
+        "treated as non-compliant._",
+        "",
+        "## Flagged companies (non-compliant or no discoverable contact)",
+        "",
+        "| Company | Email | DPO | Web form | Deletion URL | Status |",
+        "|---|:---:|:---:|:---:|:---:|---|",
+    ]
+    flagged = [r for r in records if not r["compliant"] or r["contact_method"] == "none found"]
+    for r in sorted(flagged, key=lambda x: x["company"]):
+        status = "Non-compliant" if not r["compliant"] else "No contact found"
+        lines.append(
+            f"| {r['company']} | {'✓' if r['has_privacy_email'] else '✗'} | "
+            f"{'✓' if r['has_dpo_email'] else '✗'} | "
+            f"{'✓' if r['has_sar_form'] else '✗'} | "
+            f"{'✓' if r['has_deletion_url'] else '✗'} | {status} |"
+        )
+    if not flagged:
+        lines.append("| _none_ | | | | | |")
+
+    if web_form_only:
+        lines += [
+            "",
+            "## Web-form-only companies",
+            "",
+            "_Reachable for SAR/erasure, but only via a web form — no direct privacy email._",
+            "",
+            "| Company | Web form |",
+            "|---|---|",
+        ]
+        for r in sorted(web_form_only, key=lambda x: x["company"]):
+            lines.append(f"| {r['company']} | {r['sar_form'] or '—'} |")
+
+    md_path.write_text("\n".join(lines) + "\n")
+
+    console.print(Panel(
+        f"[bold]Dataset exported[/bold]  ·  {stamp}\n"
+        f"Companies: [bold]{len(records)}[/bold]  |  "
+        f"Non-compliant: [bold red]{len(non_compliant)}[/bold red]  |  "
+        f"No contact found: [bold yellow]{len(no_contact)}[/bold yellow]  |  "
+        f"Web-form only: [bold]{len(web_form_only)}[/bold]",
+        expand=False,
+    ))
+    console.print(f"  • {json_path}")
+    console.print(f"  • {csv_path}")
+    console.print(f"  • {md_path}")
+    console.print(
+        "\n[dim]Public, citable artifact — safe to share with journalists, "
+        "regulators, or digital-rights groups.[/dim]"
+    )
 
 
 # ---------------------------------------------------------------------------

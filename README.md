@@ -82,6 +82,33 @@ python3 audit.py subscriptions
 python3 audit.py subscriptions --days 60      # stricter "unused" threshold
 ```
 
+### Privacy grades
+
+Shows a privacy grade computed **locally** from cited facts (open-source status,
+tracker counts per Exodus Privacy, ToS;DR grade, business model, known
+incidents). The grade is never our opinion — every point is shown with its
+source. Grades also appear next to each entry in `alternatives`, turning the
+neutral list into one ranked by third-party data.
+
+```
+python3 audit.py privacy              # grade every installed app, worst first
+python3 audit.py privacy spotify      # full breakdown for one app
+```
+
+### Export the public dataset
+
+Exports the curated privacy-contact database (every company, not just your
+installed apps) as a timestamped CSV + JSON + markdown artifact — ready to hand
+to journalists, regulators, or digital-rights groups. Companies are flagged as a
+contact gap only when no email, DPO, *or* SAR web form is discoverable;
+web-form-only firms are recorded separately rather than overstated as
+non-compliant.
+
+```
+python3 audit.py export-dataset                 # writes to ./output/
+python3 audit.py export-dataset -o ~/Desktop    # custom location
+```
+
 ### Look up alternatives for a specific app
 
 ```
@@ -122,6 +149,7 @@ Two plain JSON files power the tool — contributions welcome.
 | `data/sar_contacts.json` | ~25 companies with privacy emails, deletion URLs, difficulty rating |
 | `data/categories.json` | App categories (keyword lists) powering overlap detection |
 | `data/subscriptions.json` | Indicative public subscription prices and cancel links |
+| `data/privacy_scores.json` | Cited privacy attributes (trackers, ToS;DR grade, etc.) per app |
 
 To add an entry, follow the existing format and open a PR.
 
