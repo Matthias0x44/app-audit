@@ -756,135 +756,26 @@ def export_dataset(
     database — independent of your installed apps — so the non-compliance list
     can be handed to journalists, regulators, or digital-rights groups.
     """
-    import csv
+    from dataset import write_dataset
 
     sar_db = _load(SAR_CONTACTS_DB)
     if not sar_db:
         console.print("[yellow]No privacy-contact data to export.[/yellow]")
         return
 
-    output_dir.mkdir(parents=True, exist_ok=True)
-    stamp = datetime.now().strftime("%Y-%m-%d")
-
-    fields = [
-        "company", "compliant", "has_privacy_email", "has_dpo_email",
-        "has_sar_form", "contact_method", "has_deletion_url",
-        "deletion_difficulty", "privacy_email", "dpo_email",
-        "deletion_url", "sar_form", "notes",
-    ]
-    records = []
-    for key, c in sorted(sar_db.items()):
-        has_email = bool(c.get("privacy_email")) or bool(c.get("dpo_email"))
-        has_form = bool(c.get("sar_form"))
-        # Distinguish a real contact gap from a web-form-only process: a company
-        # reachable via a SAR web form is not "no contact", just not by email.
-        if has_email:
-            method = "email"
-        elif has_form:
-            method = "web-form only"
-        else:
-            method = "none found"
-        records.append({
-            "company": c.get("display_name", key),
-            "compliant": c.get("compliant", True),
-            "has_privacy_email": bool(c.get("privacy_email")),
-            "has_dpo_email": bool(c.get("dpo_email")),
-            "has_sar_form": has_form,
-            "contact_method": method,
-            "has_deletion_url": bool(c.get("deletion_url")),
-            "deletion_difficulty": c.get("deletion_difficulty", "unknown"),
-            "privacy_email": c.get("privacy_email", ""),
-            "dpo_email": c.get("dpo_email", ""),
-            "deletion_url": c.get("deletion_url", ""),
-            "sar_form": c.get("sar_form", ""),
-            "notes": c.get("notes", ""),
-        })
-
-    non_compliant = [r for r in records if not r["compliant"]]
-    # A genuine contact gap = no email, no DPO, and no SAR web form.
-    no_contact = [r for r in records if r["contact_method"] == "none found"]
-    web_form_only = [r for r in records if r["contact_method"] == "web-form only"]
-
-    # JSON
-    json_path = output_dir / f"privacy-contacts-{stamp}.json"
-    json_path.write_text(json.dumps({
-        "generated": stamp,
-        "methodology": "Compiled from public privacy policies and DPA registrations. "
-                       "A company is flagged as a contact gap only when no email, DPO, "
-                       "or SAR web form is discoverable. Web-form-only companies are "
-                       "recorded separately, not flagged as non-compliant.",
-        "total": len(records),
-        "non_compliant": len(non_compliant),
-        "no_discoverable_contact": len(no_contact),
-        "web_form_only": len(web_form_only),
-        "records": records,
-    }, indent=2))
-
-    # CSV
-    csv_path = output_dir / f"privacy-contacts-{stamp}.csv"
-    with open(csv_path, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fields)
-        writer.writeheader()
-        writer.writerows(records)
-
-    # Markdown summary
-    md_path = output_dir / f"privacy-contacts-{stamp}.md"
-    lines = [
-        f"# Privacy Contact Dataset — {stamp}",
-        "",
-        f"- **Companies tracked:** {len(records)}",
-        f"- **Confirmed non-compliant:** {len(non_compliant)}",
-        f"- **No discoverable contact (no email, DPO, or web form):** {len(no_contact)}",
-        f"- **Web-form-only (reachable, but no direct email):** {len(web_form_only)}",
-        "",
-        "_Methodology: compiled from public privacy policies and DPA registrations. "
-        "A company is flagged as a contact gap only when no email, DPO, or SAR web "
-        "form is discoverable. Web-form-only companies are listed separately, not "
-        "treated as non-compliant._",
-        "",
-        "## Flagged companies (non-compliant or no discoverable contact)",
-        "",
-        "| Company | Email | DPO | Web form | Deletion URL | Status |",
-        "|---|:---:|:---:|:---:|:---:|---|",
-    ]
-    flagged = [r for r in records if not r["compliant"] or r["contact_method"] == "none found"]
-    for r in sorted(flagged, key=lambda x: x["company"]):
-        status = "Non-compliant" if not r["compliant"] else "No contact found"
-        lines.append(
-            f"| {r['company']} | {'✓' if r['has_privacy_email'] else '✗'} | "
-            f"{'✓' if r['has_dpo_email'] else '✗'} | "
-            f"{'✓' if r['has_sar_form'] else '✗'} | "
-            f"{'✓' if r['has_deletion_url'] else '✗'} | {status} |"
-        )
-    if not flagged:
-        lines.append("| _none_ | | | | | |")
-
-    if web_form_only:
-        lines += [
-            "",
-            "## Web-form-only companies",
-            "",
-            "_Reachable for SAR/erasure, but only via a web form — no direct privacy email._",
-            "",
-            "| Company | Web form |",
-            "|---|---|",
-        ]
-        for r in sorted(web_form_only, key=lambda x: x["company"]):
-            lines.append(f"| {r['company']} | {r['sar_form'] or '—'} |")
-
-    md_path.write_text("\n".join(lines) + "\n")
+    result = write_dataset(sar_db, output_dir)
+    s = result["summary"]
 
     console.print(Panel(
-        f"[bold]Dataset exported[/bold]  ·  {stamp}\n"
-        f"Companies: [bold]{len(records)}[/bold]  |  "
-        f"Non-compliant: [bold red]{len(non_compliant)}[/bold red]  |  "
-        f"No contact found: [bold yellow]{len(no_contact)}[/bold yellow]  |  "
-        f"Web-form only: [bold]{len(web_form_only)}[/bold]",
+        f"[bold]Dataset exported[/bold]  ·  {result['stamp']}\n"
+        f"Companies: [bold]{s['total']}[/bold]  |  "
+        f"Non-compliant: [bold red]{s['non_compliant']}[/bold red]  |  "
+        f"No contact found: [bold yellow]{s['no_discoverable_contact']}[/bold yellow]  |  "
+        f"Web-form only: [bold]{s['web_form_only']}[/bold]",
         expand=False,
     ))
-    console.print(f"  • {json_path}")
-    console.print(f"  • {csv_path}")
-    console.print(f"  • {md_path}")
+    for path in result["paths"].values():
+        console.print(f"  • {path}")
     console.print(
         "\n[dim]Public, citable artifact — safe to share with journalists, "
         "regulators, or digital-rights groups.[/dim]"

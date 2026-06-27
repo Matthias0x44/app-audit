@@ -272,6 +272,19 @@ def cmd_noncompliant(args):
     return out
 
 
+def cmd_export_dataset(args):
+    from dataset import write_dataset
+    sar_db = _load(SAR_CONTACTS_DB)
+    if not sar_db:
+        raise ValueError("no privacy-contact data to export")
+    # Default to a findable, user-visible location rather than a cwd-relative dir.
+    default_dir = Path.home() / "Downloads"
+    out_dir = Path(args["output_dir"]) if args.get("output_dir") else (
+        default_dir if default_dir.exists() else Path.home()
+    )
+    return write_dataset(sar_db, out_dir)
+
+
 COMMANDS = {
     "scan": cmd_scan,
     "caches": cmd_caches,
@@ -284,6 +297,7 @@ COMMANDS = {
     "alternatives": cmd_alternatives,
     "sar": cmd_sar,
     "noncompliant": cmd_noncompliant,
+    "export_dataset": cmd_export_dataset,
 }
 
 

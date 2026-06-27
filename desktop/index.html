@@ -14,7 +14,10 @@
       <button class="nav-item" data-view="overlap">Overlap</button>
       <button class="nav-item" data-view="subscriptions">Subscriptions</button>
       <button class="nav-item" data-view="privacy">Privacy grades</button>
+      <button class="nav-item" data-view="alternatives">Alternatives</button>
       <button class="nav-item" data-view="caches">Caches</button>
+      <button class="nav-item" data-view="gdpr">GDPR requests</button>
+      <button class="nav-item" data-view="dataset">Dataset</button>
       <div class="nav-spacer"></div>
       <div class="nav-foot">Local-only · nothing leaves your Mac</div>
     </nav>
@@ -28,6 +31,17 @@
       </div>
     </main>
   </div>
+
+  <div id="modal-backdrop" class="hidden">
+    <div id="modal">
+      <div id="modal-text"></div>
+      <div id="modal-actions">
+        <button id="modal-cancel" class="btn">Cancel</button>
+        <button id="modal-confirm" class="btn btn-danger">Confirm</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="main.js"></script>
 </body>
 </html>
