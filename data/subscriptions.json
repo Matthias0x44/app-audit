@@ -1,0 +1,169 @@
+{
+  "_meta": {
+    "note": "Indicative standard individual-plan prices in USD/month, gathered from public pricing pages. NOT pulled from your account — actual cost depends on your plan, region, and currency. Verify before cancelling.",
+    "currency": "USD",
+    "period": "month"
+  },
+  "spotify": {
+    "display_name": "Spotify Premium",
+    "price": 11.99,
+    "billing": "monthly",
+    "has_free_tier": true,
+    "cancel_url": "https://www.spotify.com/account/subscription/",
+    "notes": "Free ad-supported tier exists. Family/Duo plans cheaper per person."
+  },
+  "netflix": {
+    "display_name": "Netflix",
+    "price": 15.49,
+    "billing": "monthly",
+    "has_free_tier": false,
+    "cancel_url": "https://www.netflix.com/cancelplan"
+  },
+  "adobe creative cloud": {
+    "display_name": "Adobe Creative Cloud",
+    "price": 59.99,
+    "billing": "monthly",
+    "has_free_tier": false,
+    "cancel_url": "https://account.adobe.com/plans",
+    "notes": "Annual commitment plan has early-cancellation fees. Single-app plans ~$22.99/mo."
+  },
+  "adobe photoshop": {
+    "display_name": "Adobe Photoshop",
+    "price": 22.99,
+    "billing": "monthly",
+    "has_free_tier": false,
+    "cancel_url": "https://account.adobe.com/plans"
+  },
+  "1password": {
+    "display_name": "1Password",
+    "price": 2.99,
+    "billing": "monthly",
+    "has_free_tier": false,
+    "cancel_url": "https://my.1password.com/profile/billing"
+  },
+  "dropbox": {
+    "display_name": "Dropbox Plus",
+    "price": 11.99,
+    "billing": "monthly",
+    "has_free_tier": true,
+    "cancel_url": "https://www.dropbox.com/account/plan",
+    "notes": "2 GB free tier exists."
+  },
+  "notion": {
+    "display_name": "Notion Plus",
+    "price": 10.00,
+    "billing": "monthly",
+    "has_free_tier": true,
+    "cancel_url": "https://www.notion.so/my-account",
+    "notes": "Generous free tier for individuals."
+  },
+  "evernote": {
+    "display_name": "Evernote Personal",
+    "price": 14.99,
+    "billing": "monthly",
+    "has_free_tier": true,
+    "cancel_url": "https://www.evernote.com/Settings.action"
+  },
+  "grammarly": {
+    "display_name": "Grammarly Premium",
+    "price": 12.00,
+    "billing": "monthly",
+    "has_free_tier": true,
+    "cancel_url": "https://account.grammarly.com/subscription",
+    "notes": "Free tier covers basic grammar. Annual billing lowers monthly rate."
+  },
+  "nordvpn": {
+    "display_name": "NordVPN",
+    "price": 12.99,
+    "billing": "monthly",
+    "has_free_tier": false,
+    "cancel_url": "https://my.nordaccount.com",
+    "notes": "Heavily discounted on 1-2 year plans; monthly is the worst value."
+  },
+  "expressvpn": {
+    "display_name": "ExpressVPN",
+    "price": 12.95,
+    "billing": "monthly",
+    "has_free_tier": false,
+    "cancel_url": "https://www.expressvpn.com/subscriptions"
+  },
+  "microsoft 365": {
+    "display_name": "Microsoft 365 Personal",
+    "price": 9.99,
+    "billing": "monthly",
+    "has_free_tier": false,
+    "cancel_url": "https://account.microsoft.com/services"
+  },
+  "microsoft office": {
+    "display_name": "Microsoft 365",
+    "price": 9.99,
+    "billing": "monthly",
+    "has_free_tier": false,
+    "cancel_url": "https://account.microsoft.com/services"
+  },
+  "youtube premium": {
+    "display_name": "YouTube Premium",
+    "price": 13.99,
+    "billing": "monthly",
+    "has_free_tier": true,
+    "cancel_url": "https://www.youtube.com/paid_memberships"
+  },
+  "icloud": {
+    "display_name": "iCloud+",
+    "price": 2.99,
+    "billing": "monthly",
+    "has_free_tier": true,
+    "cancel_url": "https://support.apple.com/en-us/HT207594",
+    "notes": "5 GB free. Pricing shown is the 200 GB tier."
+  },
+  "todoist": {
+    "display_name": "Todoist Pro",
+    "price": 5.00,
+    "billing": "monthly",
+    "has_free_tier": true,
+    "cancel_url": "https://todoist.com/prefs/subscription"
+  },
+  "1password families": {
+    "display_name": "1Password Families",
+    "price": 4.99,
+    "billing": "monthly",
+    "has_free_tier": false,
+    "cancel_url": "https://my.1password.com/profile/billing"
+  },
+  "setapp": {
+    "display_name": "Setapp",
+    "price": 9.99,
+    "billing": "monthly",
+    "has_free_tier": false,
+    "cancel_url": "https://my.setapp.com/account",
+    "notes": "Bundle of many Mac apps — may itself replace several other subscriptions."
+  },
+  "loom": {
+    "display_name": "Loom Business",
+    "price": 12.50,
+    "billing": "monthly",
+    "has_free_tier": true,
+    "cancel_url": "https://www.loom.com/settings/billing"
+  },
+  "figma": {
+    "display_name": "Figma Professional",
+    "price": 15.00,
+    "billing": "monthly",
+    "has_free_tier": true,
+    "cancel_url": "https://www.figma.com/settings"
+  },
+  "tidal": {
+    "display_name": "Tidal",
+    "price": 10.99,
+    "billing": "monthly",
+    "has_free_tier": false,
+    "cancel_url": "https://account.tidal.com/"
+  },
+  "disney+": {
+    "display_name": "Disney+",
+    "price": 13.99,
+    "billing": "monthly",
+    "has_free_tier": false,
+    "cancel_url": "https://www.disneyplus.com/account/subscription"
+  }
+}

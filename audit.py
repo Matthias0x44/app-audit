@@ -25,6 +25,8 @@ console = Console()
 DATA_DIR = Path(__file__).parent / "data"
 ALTERNATIVES_DB = DATA_DIR / "alternatives.json"
 SAR_CONTACTS_DB = DATA_DIR / "sar_contacts.json"
+CATEGORIES_DB = DATA_DIR / "categories.json"
+SUBSCRIPTIONS_DB = DATA_DIR / "subscriptions.json"
 
 
 def _load(path: Path) -> dict:
@@ -386,6 +388,262 @@ def noncompliant():
         f"\n[bold]{len(issues)}[/bold] apps flagged. "
         "[dim]Contribute missing contacts: github.com/Matthias0x44/app-audit[/dim]"
     )
+
+
+# ---------------------------------------------------------------------------
+# overlap
+# ---------------------------------------------------------------------------
+
+def _categorize(app_name: str, categories: dict) -> Optional[str]:
+    """Return the category whose keyword list matches this app name, if any."""
+    name = app_name.lower()
+    for category, keywords in categories.items():
+        for kw in keywords:
+            if kw in name or name in kw:
+                return category
+    return None
+
+
+@app.command()
+def overlap():
+    """Find categories where you have multiple apps doing the same job."""
+    from scanner import scan_all
+
+    apps = scan_all()
+    categories = _load(CATEGORIES_DB)
+
+    buckets: dict = {}
+    for a in apps:
+        cat = _categorize(a.name, categories)
+        if cat:
+            buckets.setdefault(cat, []).append(a)
+
+    overlaps = {c: items for c, items in buckets.items() if len(items) > 1}
+
+    if not overlaps:
+        console.print("[green]No category overlaps found — no redundant apps detected.[/green]")
+        return
+
+    console.print(Panel(
+        f"[bold]Category Overlap[/bold]  ·  "
+        f"{len(overlaps)} categories with more than one app installed",
+        expand=False,
+    ))
+
+    for cat, items in sorted(overlaps.items(), key=lambda x: -len(x[1])):
+        # The app used most recently is the one you've likely settled on.
+        def sort_key(a):
+            return a.last_used or datetime.min
+        items_sorted = sorted(items, key=sort_key, reverse=True)
+        settled = items_sorted[0]
+
+        table = Table(
+            title=f"{cat}  ({len(items)} apps)",
+            box=box.SIMPLE_HEAD,
+            title_justify="left",
+            title_style="bold yellow",
+        )
+        table.add_column("App", style="bold", min_width=22)
+        table.add_column("Last Used", width=14)
+        table.add_column("", width=24)
+
+        for a in items_sorted:
+            used = (
+                "[dim]Never[/dim]" if a.last_used is None
+                else _relative_time(a.last_used)
+            )
+            if a is settled and a.last_used is not None:
+                note = "[green]← likely your main one[/green]"
+            elif a.last_used is None:
+                note = "[red]never opened[/red]"
+            else:
+                note = "[dim]candidate to remove[/dim]"
+            table.add_row(a.name, used, note)
+
+        console.print(table)
+
+    console.print(
+        "[dim]Tip: keep the one you've settled on, audit the rest with "
+        "[bold]audit alternatives <app>[/bold] or [bold]audit sar <app> erasure[/bold].[/dim]"
+    )
+
+
+# ---------------------------------------------------------------------------
+# subscriptions
+# ---------------------------------------------------------------------------
+
+@app.command()
+def subscriptions(
+    days: int = typer.Option(90, "--days", "-d", help="Flag subs unused beyond this many days"),
+):
+    """Estimate what you're paying for installed apps, flagging unused ones."""
+    from scanner import scan_all
+
+    apps = scan_all()
+    subs_db = _load(SUBSCRIPTIONS_DB)
+    meta = subs_db.get("_meta", {})
+    now = datetime.now()
+
+    rows = []
+    monthly_total = 0.0
+    wasted_total = 0.0
+
+    for a in apps:
+        key = _match(a.name, subs_db)
+        if not key or key == "_meta":
+            continue
+        sub = subs_db[key]
+        price = sub.get("price", 0.0)
+        monthly_total += price
+
+        days_idle = (
+            None if a.last_used is None
+            else (now - a.last_used).days
+        )
+        unused = a.last_used is None or (days_idle is not None and days_idle > days)
+        if unused:
+            wasted_total += price
+
+        rows.append((a, sub, price, days_idle, unused))
+
+    if not rows:
+        console.print(
+            "[yellow]No known-subscription apps found among installed apps.[/yellow]\n"
+            "[dim]This checks a curated price list, not your actual accounts.[/dim]"
+        )
+        return
+
+    rows.sort(key=lambda r: (not r[4], -r[2]))  # unused first, then by price desc
+
+    table = Table(
+        title="Likely Subscriptions  (indicative prices, not from your account)",
+        box=box.ROUNDED,
+        show_lines=True,
+        caption=meta.get("note", ""),
+        caption_justify="left",
+    )
+    table.add_column("App", style="bold", min_width=20)
+    table.add_column("Est. /mo", justify="right", width=9)
+    table.add_column("Last Used", width=14)
+    table.add_column("Verdict", min_width=28)
+
+    for a, sub, price, days_idle, unused in rows:
+        used = (
+            "[dim]Never[/dim]" if a.last_used is None
+            else _relative_time(a.last_used)
+        )
+        if unused:
+            free = " — has free tier" if sub.get("has_free_tier") else ""
+            verdict = f"[red]Paying but unused{free}[/red]"
+        else:
+            verdict = "[green]Actively used[/green]"
+        table.add_row(
+            sub.get("display_name", a.name),
+            f"${price:.2f}",
+            used,
+            verdict,
+        )
+
+    console.print(table)
+    console.print(
+        f"\nEstimated total: [bold]${monthly_total:.2f}/mo[/bold]  "
+        f"(${monthly_total * 12:.0f}/yr)"
+    )
+    if wasted_total > 0:
+        console.print(
+            f"Potentially wasted on unused apps: "
+            f"[bold red]${wasted_total:.2f}/mo[/bold red]  "
+            f"(${wasted_total * 12:.0f}/yr)"
+        )
+    console.print(
+        "[dim]Cancel links and notes: [bold]audit subscriptions[/bold] entries come from "
+        "data/subscriptions.json — verify against your real plan before cancelling.[/dim]"
+    )
+
+
+# ---------------------------------------------------------------------------
+# clean
+# ---------------------------------------------------------------------------
+
+@app.command()
+def clean(
+    name: Optional[str] = typer.Argument(None, help="Specific cache to clear (omit for interactive)"),
+    orphaned: bool = typer.Option(False, "--orphaned", help="Clear caches with no matching installed app"),
+    yes: bool = typer.Option(False, "--yes", "-y", help="Skip confirmation (use with care)"),
+):
+    """Clear caches in ~/Library/Caches. Asks before deleting anything."""
+    from caches import clear_caches, find_orphaned_caches, format_size, get_cache_sizes
+
+    sizes = get_cache_sizes()
+    if not sizes:
+        console.print("No caches found.")
+        return
+
+    # Decide the target set of cache entries to clear.
+    if name:
+        key = name if name in sizes else None
+        if not key:
+            # case-insensitive / partial match
+            matches = [k for k in sizes if name.lower() in k.lower()]
+            if len(matches) == 1:
+                key = matches[0]
+            elif len(matches) > 1:
+                console.print(f"[yellow]'{name}' matches {len(matches)} entries:[/yellow]")
+                for m in matches[:15]:
+                    console.print(f"  • {m} ({format_size(sizes[m])})")
+                console.print("Be more specific.")
+                raise typer.Exit(1)
+        if not key:
+            console.print(f"[yellow]No cache entry matching '{name}'.[/yellow]")
+            raise typer.Exit(1)
+        targets = {key: sizes[key]}
+
+    elif orphaned:
+        from scanner import scan_all
+        bundle_ids = {a.bundle_id for a in scan_all() if a.bundle_id}
+        targets = find_orphaned_caches(bundle_ids)
+        if not targets:
+            console.print("[green]No orphaned caches found.[/green]")
+            return
+        console.print(
+            f"[bold]{len(targets)}[/bold] cache(s) with no matching app bundle. "
+            "[dim]Caches are disposable — apps rebuild them on next launch. "
+            "Steam/launcher games may appear here since their shortcuts carry no "
+            "bundle ID.[/dim]"
+        )
+
+    else:
+        # Interactive: show the top entries and let the user pick by clearing all
+        console.print("Specify a cache name, or use [bold]--orphaned[/bold] to clear "
+                      "caches with no matching app.\n")
+        table = Table(box=box.SIMPLE)
+        table.add_column("Cache", style="bold")
+        table.add_column("Size", justify="right")
+        for n, s in list(sizes.items())[:15]:
+            table.add_row(n, format_size(s))
+        console.print(table)
+        console.print("[dim]Example: audit clean com.spotify.client[/dim]")
+        return
+
+    total = sum(targets.values())
+    table = Table(box=box.SIMPLE)
+    table.add_column("Will clear", style="bold")
+    table.add_column("Size", justify="right")
+    for n, s in sorted(targets.items(), key=lambda x: -x[1]):
+        table.add_row(n, format_size(s))
+    console.print(table)
+    console.print(f"Total to free: [bold]{format_size(total)}[/bold]\n")
+
+    if not yes and not Confirm.ask(
+        f"[red]Delete {len(targets)} cache item(s)?[/red] (apps will rebuild caches as needed)"
+    ):
+        console.print("Aborted.")
+        return
+
+    cleared, freed, errors = clear_caches(list(targets.keys()))
+    console.print(f"[green]Cleared {cleared} item(s), freed {format_size(freed)}.[/green]")
+    for err in errors:
+        console.print(f"[yellow]  skipped {err}[/yellow]")
 
 
 # ---------------------------------------------------------------------------

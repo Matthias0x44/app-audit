@@ -51,6 +51,37 @@ python3 audit.py caches
 python3 audit.py caches --top 10
 ```
 
+### Clear caches
+
+Deletes cache entries after a confirmation. Caches are disposable — apps rebuild
+them on next launch. Apple/system caches are never touched.
+
+```
+python3 audit.py clean com.spotify.client     # clear one app's cache
+python3 audit.py clean --orphaned             # clear caches with no matching app
+python3 audit.py clean --orphaned --yes       # skip the confirmation prompt
+```
+
+### Category overlap
+
+Finds categories where you have several apps doing the same job, and points at
+the one you've most recently used as the likely keeper.
+
+```
+python3 audit.py overlap
+```
+
+### Subscriptions
+
+Estimates monthly spend on installed apps using a curated public price list
+(*not* your actual account), flagging anything you're likely paying for but no
+longer using.
+
+```
+python3 audit.py subscriptions
+python3 audit.py subscriptions --days 60      # stricter "unused" threshold
+```
+
 ### Look up alternatives for a specific app
 
 ```
@@ -89,6 +120,8 @@ Two plain JSON files power the tool — contributions welcome.
 |---|---|
 | `data/alternatives.json` | ~30 apps with FOSS/indie alternatives, license, platforms |
 | `data/sar_contacts.json` | ~25 companies with privacy emails, deletion URLs, difficulty rating |
+| `data/categories.json` | App categories (keyword lists) powering overlap detection |
+| `data/subscriptions.json` | Indicative public subscription prices and cancel links |
 
 To add an entry, follow the existing format and open a PR.
 
